@@ -7,10 +7,13 @@ const ThemedView = ({ style, safe = false, ...props }: any) => {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme] ?? Colors.light;
 
-  if (!safe)
-    return (
-      <View style={[{ backgroundColor: theme.background }, style]} {...props} />
-    );
+
+    if (!safe) return (
+      <View
+        style={[{ backgroundColor: theme.background }, style]}
+        {...props}
+      />
+    )
 
   const insets: any = useSafeAreaInsets();
 

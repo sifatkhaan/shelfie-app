@@ -7,7 +7,7 @@ import { useUser } from "../../hooks/useUser";
 import ThemedButton from "../../components/ThemedButton";
 
 const Profile = () => {
-  const {logout, user} = useUser()
+  const {logout, user}:any = useUser()
   return (
     <ThemedView style={styles.container}>
       <ThemedText title={true} style={styles.heading}>

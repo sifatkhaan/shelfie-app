@@ -11,9 +11,10 @@ import ThemedTextInput from "../../components/ThemedTextInput";
 
 const Books = () => {
   const { books, setSearchQuery }: any = useBooks();
+  // const { books }: any = useBooks();
   const router = useRouter();
   return (
-    <ThemedView style={styles.container} safe={true}>
+    <ThemedView style={styles.container} safe={false}>
       <Spacer />
       <ThemedText title={true} style={styles.heading}>
         Your Reading List

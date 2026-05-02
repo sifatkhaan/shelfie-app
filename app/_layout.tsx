@@ -1,4 +1,4 @@
-import { useColorScheme } from "react-native";
+import { LogBox, useColorScheme } from "react-native";
 import React from "react";
 import { Stack } from "expo-router";
 
@@ -8,6 +8,10 @@ import { UserProvider } from "../contexts/UserContext";
 import { BooksProvider } from "../contexts/BooksContext";
 
 const RootLayout = () => {
+  LogBox.ignoreLogs([
+    "INVALID_STATE_ERR",
+    "Realtime got disconnected",
+  ]);
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme] ?? Colors.light;
   return (

@@ -1,4 +1,4 @@
-import { StyleSheet, Text } from "react-native";
+import { Modal, StyleSheet, Text } from "react-native";
 import React, { useEffect, useState } from "react";
 import ThemedView from "../../../components/ThemedView";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -9,11 +9,16 @@ import ThemedCard from "../../../components/ThemedCard";
 import ThemedLoader from "../../../components/ThemedLoader";
 import ThemedButton from "../../../components/ThemedButton";
 import { Colors } from "../../../constants/Colors";
+import BookForm from "../../../components/Forms/BookForm";
 
 const BookDetails = () => {
   const [book, setBook] = useState<any>(null);
+  const [selectedBook, setSelectedBook] = useState<any>(null);
+  const [open, setOpen] = useState(false);
+
   const { id } = useLocalSearchParams();
-  const { fethBookById, deleteBook }: any = useBooks();
+  const {books, fethBookById, deleteBook, updateBook }: any = useBooks();
+  
   const router = useRouter();
 
   const handleDelete = async () => {
@@ -24,11 +29,32 @@ const BookDetails = () => {
 
   useEffect(() => {
     async function loadBook() {
-      const bookData = await fethBookById(id);
-      setBook(bookData);
+      const data = await fethBookById(id);
+      setBook(data);
     }
-    loadBook();
+  
+    if (id) loadBook();
   }, [id]);
+
+  useEffect(() => {
+    if (!books.length || !id) return;
+  
+    const updated = books.find((b) => b.$id === id);
+  
+    if (updated) {
+      setBook(updated); // ✅ sync realtime
+    }
+  }, [books, id]);
+
+
+  // useEffect(() => {
+  //   async function loadBook() {
+  //     const bookData = await fethBookById(id);
+  //     setBook(bookData);
+  //   }
+  //   loadBook();
+  // }, [id]);
+
 
   if (!book) {
     return (
@@ -51,6 +77,27 @@ const BookDetails = () => {
       <ThemedButton style={styles.delete} onPress={handleDelete}>
         <Text style={{ color: "#fff", textAlign: "center" }}>Delete Book</Text>
       </ThemedButton>
+      <ThemedButton
+        style={styles.edit}
+        onPress={() => {
+          setSelectedBook(book);
+          setOpen(true);
+        }}
+      >
+        <Text style={{ color: "#fff", textAlign: "center" }}>Edit</Text>
+      </ThemedButton>
+
+      {open && (
+        <Modal>
+          <BookForm
+            initialData={selectedBook}
+            onSubmit={async (data) => {
+              await updateBook(selectedBook.$id, data);
+              setOpen(false);
+            }}
+          />
+        </Modal>
+      )}
     </ThemedView>
   );
 };
@@ -72,6 +119,12 @@ const styles = StyleSheet.create({
   delete: {
     marginTop: 40,
     backgroundColor: Colors.warning,
+    width: 200,
+    alignSelf: "center",
+  },
+  edit: {
+    marginTop: 40,
+    backgroundColor: Colors.primary,
     width: 200,
     alignSelf: "center",
   },

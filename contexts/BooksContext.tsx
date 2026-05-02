@@ -1,7 +1,8 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
 import { client, databases } from "../lib/appwrite";
 import { ID, Permission, Query, Role } from "react-native-appwrite";
 import { useUser } from "../hooks/useUser";
+import { AppState } from "react-native";
 
 const DATABASE_ID = "69eb4343003b85747656";
 const TABLE_ID = "books";
@@ -12,6 +13,7 @@ export function BooksProvider({ children }: any) {
   const [filteredBooks, setFilteredBooks] = useState<any>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const { user }: any = useUser();
+  const subscriptionRef = useRef<any>(null);
 
   async function fetchBooks() {
     try {
@@ -62,6 +64,8 @@ export function BooksProvider({ children }: any) {
           Permission.delete(Role.user(user.$id)),
         ]
       );
+
+      setBooks((prev: any) => [...prev, newBook]);
     } catch (error: any) {
       console.error(error);
     }
@@ -69,17 +73,32 @@ export function BooksProvider({ children }: any) {
   async function deleteBook(id: any) {
     try {
       await databases.deleteDocument(DATABASE_ID, TABLE_ID, id);
+      setBooks((prev: any[]) => prev.filter((book) => book.$id !== id));
     } catch (error: any) {
       console.error(error.message);
     }
   }
-  //   async function fethBookById(id:any) {
-  //     try{
 
-  //     }catch(error:any){
-  //         console.error(error)
-  //     }
-  //   }
+  async function updateBook(id: string, data: any) {
+    try {
+      const updatedBook = await databases.updateDocument(
+        DATABASE_ID,
+        TABLE_ID,
+        id,
+        data
+      );
+
+      setBooks((prev: any[]) =>
+        prev.map((book) =>
+          book.$id === id ? { ...book, ...updatedBook } : book
+        )
+      );
+
+      return updatedBook;
+    } catch (error: any) {
+      console.error("Update error:", error.message);
+    }
+  }
 
   useEffect(() => {
     filterBooks();
@@ -101,6 +120,11 @@ export function BooksProvider({ children }: any) {
             prevBooks.filter((book: any) => book.$id !== payload.$id)
           );
         }
+        if (events[0].includes("update")) {
+          setBooks((prev: any[]) =>
+            prev.map((book) => (book.$id === payload.$id ? payload : book))
+          );
+        }
       });
     } else {
       setBooks([]);
@@ -113,7 +137,15 @@ export function BooksProvider({ children }: any) {
 
   return (
     <BooksContext.Provider
-      value={{ books:filteredBooks, setSearchQuery, fetchBooks, fethBookById, createBook, deleteBook }}
+      value={{
+        books: filteredBooks,
+        setSearchQuery,
+        fetchBooks,
+        fethBookById,
+        createBook,
+        deleteBook,
+        updateBook,
+      }}
     >
       {children}
     </BooksContext.Provider>
