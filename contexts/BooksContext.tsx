@@ -111,8 +111,16 @@ export function BooksProvider({ children }: any) {
       fetchBooks();
       unsubscribe = client.subscribe(channel, (response) => {
         const { payload, events }: any = response;
+        // if (events[0].includes("create")) {
+        //   setBooks((prev: any) => [...prev, payload]);
+        // }
+
         if (events[0].includes("create")) {
-          setBooks((prev: any) => [...prev, payload]);
+          setBooks((prev: any[]) => {
+            const exists = prev.some((b) => b.$id === payload.$id);
+            if (exists) return prev; // ✅ prevent duplicate
+            return [...prev, payload];
+          });
         }
 
         if (events[0].includes("delete")) {

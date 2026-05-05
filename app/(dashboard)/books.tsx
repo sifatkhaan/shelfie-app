@@ -1,4 +1,4 @@
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { FlatList, Image, Pressable, StyleSheet, View } from "react-native";
 import React from "react";
 import ThemedView from "../../components/ThemedView";
 import ThemedText from "../../components/ThemedText";
@@ -21,12 +21,11 @@ const Books = () => {
       </ThemedText>
       <Spacer />
 
-        <ThemedTextInput
-          style={styles.searchInput}
-          placeholder="Search books, authors, or description"
-          onChangeText={setSearchQuery}
-        />
-
+      <ThemedTextInput
+        style={styles.searchInput}
+        placeholder="Search books, authors, or description"
+        onChangeText={setSearchQuery}
+      />
 
       <FlatList
         data={books}
@@ -35,8 +34,22 @@ const Books = () => {
         renderItem={({ item }) => (
           <Pressable onPress={() => router.push(`books/${item.$id}`)}>
             <ThemedCard style={styles.card}>
-              <ThemedText style={styles.title}>{item.title}</ThemedText>
-              <ThemedText>Written by {item.author}</ThemedText>
+              <View style={styles.row}>
+                {item.photoUrl ? (
+                  <Image source={{ uri: item.photoUrl }} style={styles.image} />
+                ) : (
+                  <View style={styles.placeholder}>
+                    <ThemedText>No Image</ThemedText>
+                  </View>
+                )}
+                <View style={styles.textContainer}>
+                  <ThemedText style={styles.title}>{item.title}</ThemedText>
+                  <ThemedText>Written by {item.author}</ThemedText>
+                  <ThemedText style={styles.date}>
+                   Publish Date: {item.publishDate || "No date"}
+                  </ThemedText>
+                </View>
+              </View>
             </ThemedCard>
           </Pressable>
         )}
@@ -78,11 +91,38 @@ const styles = StyleSheet.create({
     padding: 10,
     borderWidth: 1,
     borderColor: Colors.primary,
-    backgroundColor:'#fff',
+    backgroundColor: "#fff",
     marginBottom: 8,
     borderRadius: 8,
     alignSelf: "stretch",
     width: "90%",
     marginHorizontal: "5%",
+  },
+  date: {
+    marginTop: 4,
+    opacity: 0.7,
+    fontSize: 12,
+  },
+  image: {
+    width: 70,
+    height: 90,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  placeholder: {
+    width: 70,
+    height: 90,
+    borderRadius: 8,
+    backgroundColor: "#ccc",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  textContainer: {
+    flex: 1,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
   },
 });
